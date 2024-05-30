@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10">
+        <div class="flex items-center justify-between mt-4">
+            <a href="{{ url_for('projects') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Go Back</a>
+            <a href="{{ url_for('home_route') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Main Page</a>
+        </div>
+        &nbsp;
+        <h2 class="text-xl font-bold mb-4">Project: {{ project.name }}</h2>
+        <p>{{ project.description }}</p>
+        <p>Start Date: {{ project.start_date }}</p>
+        <p>Deadline: {{ project.deadline }}</p>
+        <h3 class="text-lg font-bold mt-6 mb-2">Tasks</h3>
+        <ul>
+            {% for task in tasks %}
+                {% if task.completed %}
+                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-blue-500">{{ task.title }} - Completed</a></li>
+                {% elif task.status == 'In Progress' %}
+                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-yellow-500">{{ task.title }} - In Progress</a></li>
+                {% elif task.deadline and task.deadline < now and not task.completed %}
+                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-red-500">{{ task.title }} - Failed</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-green-500">{{ task.title }} - Free</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        &nbsp;
+        
+        <form method="post">
+            <input type="text" name="task_title" placeholder="Task Title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required>
+            <textarea name="task_description" placeholder="Task Description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required></textarea>
+            <input type="datetime-local" name="task_deadline" placeholder="Task Deadline" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Task</button>
+        </form>
+        &nbsp;
+
+        <!-- Add participant form -->
+        <form method="post">
+            <input type="text" name="participant_username" placeholder="Participant Username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required>
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Participant</button>
+        </form>
+        &nbsp;
+
+        <!-- Comment form -->
+        <form method="post" class="mt-4" onsubmit="return validateForm(this);">
+            <textarea name="comment_content" placeholder="Type some changes or achievements" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add an Update</button>
+        </form>
+
+        <!-- Display comments -->
+        <div class="mt-6">
+            <h3 class="text-lg font-bold mb-2">Updates</h3>
+            {% for comment in comments %}
+                <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                    <p class="text-gray-700 mb-2">{{ comment.content }}</p>
+                    <p class="text-gray-500 text-sm">{{ comment.date_posted.strftime('%Y-%m-%d %H:%M:%S') }} by {{ comment.user.username }}</p>
+                    <form method="post" action="{{ url_for('delete_project_comment', comment_id=comment.id) }}">
+                        <button type="submit" class="text-red-500 text-sm">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+<script src="/static/js/script.js"></script>
+<script>
+    function validateForm(form) {
+        var content = form.comment_content.value.trim();
+        if (!content) {
+            alert("Please write something before submitting.");
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

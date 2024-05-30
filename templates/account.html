@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="container mx-auto mt-10">
+    <h2 class="text-xl font-bold mb-4">Account Settings</h2>
+    <p>Current Username: {{ user.username }}</p>
+    <p>Current Email: {{ user.email }}</p>
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {{ form.hidden_tag() }}
+        <div class="mb-6">
+            {{ form.current_password.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.current_password(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", size=32) }}
+        </div>
+        <div class="mb-6">
+            {{ form.username.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.username(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", size=32) }}
+            <div class="flex items-center justify-between mt-4">
+                {{ form.submit_username(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+            </div>
+        </div>
+        <div class="mb-6">
+            {{ form.email.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.email(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", size=32) }}
+            <div class="flex items-center justify-between mt-4">
+                {{ form.submit_email(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+            </div>
+        </div>
+        <div class="mb-6">
+            {{ form.new_password.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.new_password(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", size=32) }}
+            <div class="flex items-center justify-between mt-4">
+                {{ form.submit_password(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+            </div>
+        </div>
+        <div class="mb-6">
+            <form method="post" action="{{ url_for('delete_account') }}" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                {{ form.hidden_tag() }}
+                <div class="flex items-center justify-between mt-4">
+                    {{ form.submit_delete_account(class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+                </div>
+            </form>
+        </div>
+        <div class="flex items-center justify-between mt-4">
+            <a href="{{ url_for('home_route') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Go Back</a>
+        </div>
+    </form>
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>

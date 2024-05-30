@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10">
+        <div class="flex items-center justify-between mt-4">
+            <a href="{{ url_for('project', project_id=task.project.id) }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Go Back to Project</a>
+            <a href="{{ url_for('home_route') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Main Page</a>
+        </div>
+        &nbsp;
+        <h2 class="text-xl font-bold mb-4">Task: {{ task.title }}</h2>
+        <p>{{ task.description }}</p>
+        <p>Start Date: {{ task.start_date }}</p>
+        <p>Deadline: {{ task.deadline }}</p>
+        <form method="post">
+            <label for="status">Status:</label>
+            <select id="status" name="status" class="form-select mt-1 block w-full">
+                <option value="Free" {% if task.status == 'Free' %}selected{% endif %}>Free</option>
+                <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">Mark Task</button>
+        </form>
+        &nbsp;
+        
+        <!-- Comment form -->
+        <form method="post" class="mt-4" onsubmit="return validateForm(this);">
+            <textarea name="comment_content" placeholder="Type some changes or achievements" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add an Update</button>
+        </form>
+
+        <!-- Display comments -->
+        <div class="mt-6">
+            <h3 class="text-lg font-bold mb-2">Updates</h3>
+            {% for comment in comments %}
+                <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                    <p class="text-gray-700 mb-2">{{ comment.content }}</p>
+                    <p class="text-gray-500 text-sm">{{ comment.date_posted.strftime('%Y-%m-%d %H:%M:%S') }} by {{ comment.user.username }}</p>
+                    <form method="post" action="{{ url_for('delete_task_comment', comment_id=comment.id) }}">
+                        <button type="submit" class="text-red-500 text-sm">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+        
+    </div>
+<script src="/static/js/script.js"></script>
+<script>
+    function validateForm(form) {
+        var content = form.comment_content.value.trim();
+        if (!content) {
+            alert("Please write something before submitting.");
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

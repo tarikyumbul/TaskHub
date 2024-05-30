@@ -1,0 +1,12 @@
+Flask-Migrate
+email_validator
+flask
+flask-migrate
+flask-wtf
+flask_sqlalchemy
+flask_wtf
+portalocker
+waitress
+werkzeug==3.0.1
+wtforms
+pytz

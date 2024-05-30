@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+  <body class="bg-gray-100">
+    <header class="bg-gray-800 text-white p-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl">TaskHub</h1>
+        <nav>
+          {% if not session.get('username') %}
+            <a href="{{ url_for('register') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Register</a>
+            <a href="{{ url_for('login') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Login</a>
+          {% else %}
+            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</a>
+            <a href="{{ url_for('account') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Account Settings</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <div class="container mx-auto mt-10">
+      {% if not session.get('username') %}
+        <h1 class="text-3xl font-bold mb-2">Welcome to TaskHub</h1>
+        <p class="mb-4">It's a simple task management system. You can register a new account or login with an existing one.</p>
+      {% else %}
+        <h1 class="text-3xl font-bold mb-2">Welcome back, {{ session.get('username') }}!</h1>
+        <p class="mb-4">You are logged in. Enjoy your stay!</p>
+        <a href="{{ url_for('projects') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Go to Projects</a>
+      {% endif %}
+    </div>
+    <script src="/static/js/script.js"></script>
+  </body>
+</html>
