@@ -4,6 +4,8 @@ from forms import LoginForm, RegistrationForm, AccountForm, DeleteAccountForm
 from flask import session, render_template, request, redirect, url_for, flash
 from datetime import datetime
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 # Ensure the database tables are created
 with app.app_context():
     db.create_all()
@@ -11,6 +13,8 @@ with app.app_context():
     if not hasattr(Task, 'completed'):
         with db.engine.connect() as conn:
             conn.execute('ALTER TABLE task ADD COLUMN completed BOOLEAN DEFAULT FALSE')
+
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/projects", methods=['GET', 'POST'])
 def projects():
@@ -35,7 +39,7 @@ def projects():
     projects = user.projects
     return render_template('projects.html', projects=projects, user=user, project=None)
 
-
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/project/<int:project_id>", methods=['GET', 'POST'])
 def project(project_id):
@@ -84,6 +88,7 @@ def project(project_id):
     now = datetime.now()
     return render_template('project.html', project=project, user=user, tasks=project.tasks, comments=comments, now=now)
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/delete_project_comment/<int:comment_id>", methods=['POST'])
 def delete_project_comment(comment_id):
@@ -99,6 +104,7 @@ def delete_project_comment(comment_id):
     if comment.project_id:
         return redirect(url_for('project', project_id=comment.project_id))
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/delete_task_comment/<int:comment_id>", methods=['POST'])
 def delete_task_comment(comment_id):
@@ -115,7 +121,7 @@ def delete_task_comment(comment_id):
         return redirect(url_for('task', task_id=comment.task_id))
     return redirect(url_for('home_route'))
 
-
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/task/<int:task_id>", methods=['GET', 'POST'])
 def task(task_id):
@@ -145,7 +151,7 @@ def task(task_id):
     comments = TaskComment.query.filter_by(task_id=task_id).order_by(TaskComment.date_posted.desc()).all()
     return render_template('task.html', task=task, comments=comments)
 
-
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/account", methods=['GET', 'POST'])
 def account():
@@ -180,6 +186,7 @@ def account():
 
     return render_template('account.html', title='Account Settings', form=form, user=user)
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/update_username", methods=['POST'])
 def update_username():
@@ -198,6 +205,8 @@ def update_username():
     else:
         flash('Invalid username. Please try again.')
     return redirect(url_for('account'))
+
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/update_email", methods=['POST'])
 def update_email():
@@ -222,6 +231,8 @@ def update_email():
 
     return redirect(url_for('account'))
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 @app.route("/update_password", methods=['POST'])
 def update_password():
     if 'username' not in session:
@@ -245,6 +256,8 @@ def update_password():
 
     return redirect(url_for('account'))
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 @app.route("/delete_account", methods=['POST'])
 def delete_account():
     if 'username' not in session:
@@ -266,6 +279,8 @@ def delete_account():
             flash('Invalid password. Please try again.')
     return redirect(url_for('account'))
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -277,6 +292,8 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -292,31 +309,21 @@ def login():
         return redirect(url_for('home_route'))
     return render_template('login.html', title='Sign In', form=form)
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 @app.route("/logout")
 def logout():
     session.pop('username', None)
     flash('You have been logged out.')
     return redirect(url_for('home_route'))
 
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
 @app.route("/")
 def home_route():
     return render_template("home.html")
 
-@app.route("/add_participant/<int:project_id>", methods=['POST'])
-def add_participant(project_id):
-    if 'username' not in session:
-        flash('You must be logged in to perform this action.')
-        return redirect(url_for('login'))
-    project = Project.query.get_or_404(project_id)
-    participant_username = request.form.get('participant_username')
-    participant = User.query.filter_by(username=participant_username).first()
-    if participant:
-        project.participants.append(participant)
-        db.session.commit()
-        flash('Participant added successfully!')
-    else:
-        flash('Invalid username. Please try again.')
-    return redirect(url_for('project', project_id=project_id))
+#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 if __name__ == "__main__":
     from wsgi import initialize

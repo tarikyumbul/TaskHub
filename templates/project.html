@@ -18,12 +18,12 @@
         <h3 class="text-lg font-bold mt-6 mb-2">Tasks</h3>
         <ul>
             {% for task in tasks %}
-                {% if task.completed %}
+                {% if task.deadline and task.deadline < now and not task.completed %}
+                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-red-500">{{ task.title }} - Failed</a></li>
+                {% elif task.completed %}
                     <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-blue-500">{{ task.title }} - Completed</a></li>
                 {% elif task.status == 'In Progress' %}
                     <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-yellow-500">{{ task.title }} - In Progress</a></li>
-                {% elif task.deadline and task.deadline < now and not task.completed %}
-                    <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-red-500">{{ task.title }} - Failed</a></li>
                 {% else %}
                     <li><a href="{{ url_for('task', task_id=task.id) }}" class="text-green-500">{{ task.title }} - Free</a></li>
                 {% endif %}
@@ -69,15 +69,5 @@
 
     </div>
 <script src="/static/js/script.js"></script>
-<script>
-    function validateForm(form) {
-        var content = form.comment_content.value.trim();
-        if (!content) {
-            alert("Please write something before submitting.");
-            return false;
-        }
-        return true;
-    }
-</script>
 </body>
 </html>
