@@ -9,7 +9,6 @@ from datetime import datetime
 # Ensure the database tables are created
 with app.app_context():
     db.create_all()
-    # Ensure the 'completed' column exists in the Task table
     if not hasattr(Task, 'completed'):
         with db.engine.connect() as conn:
             conn.execute('ALTER TABLE task ADD COLUMN completed BOOLEAN DEFAULT FALSE')
@@ -28,16 +27,17 @@ def projects():
     if request.method == 'POST':
         project_name = request.form.get('project_name')
         project_description = request.form.get('project_description')
-        project_deadline_str = request.form.get('project_deadline')  # Get deadline from form
-        project_deadline = datetime.strptime(project_deadline_str, '%Y-%m-%dT%H:%M')  # Convert to datetime object
-        start_date = datetime.now()  # Get current datetime
+        project_deadline_str = request.form.get('project_deadline')
+        project_deadline = datetime.strptime(project_deadline_str, '%Y-%m-%dT%H:%M')
+        start_date = datetime.now()
         new_project = Project(name=project_name, description=project_description, owner=user, start_date=start_date, deadline=project_deadline)  # Include start date and deadline in project creation
+        new_project.participants.append(user)
         db.session.add(new_project)
         db.session.commit()
         flash('Project created successfully!')
         return redirect(url_for('projects'))
-    projects = user.projects
-    return render_template('projects.html', projects=projects, user=user, project=None)
+    projects = user.participated_projects.all()
+    return render_template('projects.html', projects=projects, user=user)
 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
@@ -70,9 +70,12 @@ def project(project_id):
             participant_username = request.form.get('participant_username')
             participant = User.query.filter_by(username=participant_username).first()
             if participant:
-                project.participants.append(participant)
-                db.session.commit()
-                flash('Participant added successfully!')
+                if participant not in project.participants:
+                    project.participants.append(participant)
+                    db.session.commit()
+                    flash('Participant added successfully!')
+                else:
+                    flash('Participant is already associated with the project.')
             else:
                 flash('Invalid username. Please try again.')
             return redirect(url_for('project', project_id=project_id))
@@ -193,7 +196,7 @@ def update_username():
     if 'username' not in session:
         flash('You must be logged in to perform this action.')
         return redirect(url_for('login'))
-    form = AccountForm()  # Assuming AccountForm contains a field for new username
+    form = AccountForm()
     user = User.query.filter_by(username=session['username']).first()
     if user is None:
         flash('User not found.')
@@ -299,7 +302,6 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        # Updated to allow login with either username or email
         user = User.query.filter((User.username == form.username.data) | (User.email == form.username.data)).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')

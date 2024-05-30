@@ -19,9 +19,9 @@
       </form>
       &nbsp;
       <ul>
+        <h1><b>Active Projects</b></h1>
         {% for project in projects %}
           <li>
-            <h1><b>Active Projects</b></h1>
             <a href="{{ url_for('project', project_id=project.id) }}">{{ project.name }}</a>
           </li>
         {% endfor %}
