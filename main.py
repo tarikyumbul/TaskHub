@@ -28,17 +28,16 @@ def projects():
         project_name = request.form.get('project_name')
         project_description = request.form.get('project_description')
         project_deadline_str = request.form.get('project_deadline')
-        project_deadline = datetime.strptime(project_deadline_str, '%Y-%m-%dT%H:%M')
         start_date = datetime.now()
-        new_project = Project(name=project_name, description=project_description, owner=user, start_date=start_date, deadline=project_deadline)  # Include start date and deadline in project creation
-        new_project.participants.append(user)
-        new_project.owner_id = user.id
-        print(new_project.owner_id)
-        print(user.id)
-        db.session.add(new_project)
-        db.session.commit()
-        flash('Project created successfully!')
-        return redirect(url_for('projects'))
+        if project_name and project_description and user and start_date and project_deadline_str:
+            project_deadline = datetime.strptime(project_deadline_str, '%Y-%m-%dT%H:%M')
+            new_project = Project(name=project_name, description=project_description, owner=user, start_date=start_date, deadline=project_deadline)  # Include start date and deadline in project creation
+            new_project.participants.append(user)
+            new_project.owner_id = user.id
+            db.session.add(new_project)
+            db.session.commit()
+            flash('Project created successfully!')
+            return redirect(url_for('projects'))
     projects = user.participated_projects.all()
     return render_template('projects.html', projects=projects, user=user)
 
@@ -51,13 +50,11 @@ def project(project_id):
         return redirect(url_for('login'))
     
     user = User.query.filter_by(username=session['username']).first()
-    print(user.id)
     if user is None:
         flash('User not found.')
         return redirect(url_for('logout'))
     
     project = Project.query.get_or_404(project_id)
-    print(project.owner_id)
     if request.method == 'POST':
         if 'task_title' in request.form:
             task_title = request.form.get('task_title')
@@ -102,7 +99,7 @@ def project(project_id):
     
     comments = ProjectComment.query.filter_by(project_id=project_id).order_by(ProjectComment.date_posted.desc()).all()
     now = datetime.now()
-    participants = project.participants.all()  # Retrieve all participants
+    participants = project.participants.all()
     return render_template('project.html', project=project, user=user, tasks=project.tasks, comments=comments, now=now, participants=participants)
 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
@@ -146,12 +143,6 @@ def task(task_id):
     user = User.query.filter_by(username=session['username']).first()
     
     if request.method == 'POST':
-        """
-        if 'task_completed' in request.form:
-            task.completed = 'task_completed' in request.form
-            db.session.commit()
-            flash('Task updated successfully!')
-        """
         if 'comment_content' in request.form:
             comment_content = request.form.get('comment_content')
             new_comment = TaskComment(content=comment_content, user=user, task=task)
@@ -163,8 +154,29 @@ def task(task_id):
             task.status = status
             task.completed = (status == 'Completed')
             db.session.commit()
+        assignee_username = request.form.get('assignee_username[]')
+        if assignee_username:
+            assignee = User.query.filter_by(username=assignee_username).first()
+            if assignee:
+                if assignee in task.project.participants:
+                    task.assignee = assignee
+                    db.session.commit()
+                    flash('Assignee added successfully!')
+                else:
+                    flash('Assignee does not have access to the project.')
+            else:
+                flash('Invalid username for assignee. Please try again.')
+        remove_assignee = request.form.get('remove_assignee')
+        if remove_assignee:
+            if task.assignee:
+                task.assignee = None
+                db.session.commit()
+                flash('Assignee removed successfully!')
+            else:
+                flash('No assignee to remove.')
+
         return redirect(url_for('task', task_id=task.id))
-    
+
     comments = TaskComment.query.filter_by(task_id=task_id).order_by(TaskComment.date_posted.desc()).all()
     return render_template('task.html', task=task, comments=comments)
 

@@ -26,6 +26,29 @@
         </form>
         &nbsp;
         
+        <div class="mt-4">
+            <h3 class="text-lg font-bold mb-2">Current Assignees</h3>
+            {% if task.assignee %}
+                <li>
+                    {{ task.assignee.username }}
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="remove_assignee" value="true">
+                        <button type="submit" class="text-red-500">Remove</button>
+                    </form>
+                </li>
+            {% else %}
+                <p>No assignee</p>
+            {% endif %}
+        </div>         
+
+        <!-- Assignee form -->
+        <form method="post" class="mt-4">
+            <label for="assignee_username">Assignees:</label>
+            <input type="text" id="assignee_username" name="assignee_username[]" placeholder="Enter username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Assign</button>
+        </form>
+        &nbsp;
+
         <!-- Comment form -->
         <form method="post" class="mt-4" onsubmit="return validateForm(this);">
             <textarea name="comment_content" placeholder="Type some changes or achievements" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" required></textarea>
