@@ -15,6 +15,24 @@
         <p>{{ project.description }}</p>
         <p>Start Date: {{ project.start_date }}</p>
         <p>Deadline: {{ project.deadline }}</p>
+
+        <!-- Display Participants -->
+        <h3 class="text-lg font-bold mt-6 mb-2">Participants</h3>
+        <ul>
+            {% for participant in participants %}
+                <li>
+                    {{ participant.username }}
+                    {% if project.owner_id != participant.id %}
+                        <form method="post" style="display: inline;">
+                            <input type="hidden" name="remove_participant_id" value="{{ participant.id }}">
+                            <button type="submit" class="text-red-500">Remove</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        &nbsp;
+
         <h3 class="text-lg font-bold mt-6 mb-2">Tasks</h3>
         <ul>
             {% for task in tasks %}

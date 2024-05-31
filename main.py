@@ -32,6 +32,9 @@ def projects():
         start_date = datetime.now()
         new_project = Project(name=project_name, description=project_description, owner=user, start_date=start_date, deadline=project_deadline)  # Include start date and deadline in project creation
         new_project.participants.append(user)
+        new_project.owner_id = user.id
+        print(new_project.owner_id)
+        print(user.id)
         db.session.add(new_project)
         db.session.commit()
         flash('Project created successfully!')
@@ -48,13 +51,13 @@ def project(project_id):
         return redirect(url_for('login'))
     
     user = User.query.filter_by(username=session['username']).first()
-    
+    print(user.id)
     if user is None:
         flash('User not found.')
         return redirect(url_for('logout'))
     
     project = Project.query.get_or_404(project_id)
-    
+    print(project.owner_id)
     if request.method == 'POST':
         if 'task_title' in request.form:
             task_title = request.form.get('task_title')
@@ -79,6 +82,16 @@ def project(project_id):
             else:
                 flash('Invalid username. Please try again.')
             return redirect(url_for('project', project_id=project_id))
+        elif 'remove_participant_id' in request.form:
+            participant_id = request.form.get('remove_participant_id')
+            participant = User.query.get(participant_id)
+            if participant and participant in project.participants:
+                project.participants.remove(participant)
+                db.session.commit()
+                flash('Participant removed successfully!')
+            else:
+                flash('Participant not found in the project.')
+            return redirect(url_for('project', project_id=project_id))
         elif 'comment_content' in request.form:
             comment_content = request.form.get('comment_content')
             new_comment = ProjectComment(content=comment_content, user=user, project=project)
@@ -89,7 +102,8 @@ def project(project_id):
     
     comments = ProjectComment.query.filter_by(project_id=project_id).order_by(ProjectComment.date_posted.desc()).all()
     now = datetime.now()
-    return render_template('project.html', project=project, user=user, tasks=project.tasks, comments=comments, now=now)
+    participants = project.participants.all()  # Retrieve all participants
+    return render_template('project.html', project=project, user=user, tasks=project.tasks, comments=comments, now=now, participants=participants)
 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
